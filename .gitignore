@@ -1,0 +1,9 @@
+# Fichiers système et éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Espaces de test du skill (gardés hors du dépôt)
+*-workspace/
+evals/runs/

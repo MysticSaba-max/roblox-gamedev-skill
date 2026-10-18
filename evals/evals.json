@@ -1,0 +1,123 @@
+{
+  "skill_name": "roblox-gamedev",
+  "evals": [
+    {
+      "id": 1,
+      "name": "ui-react-rien-ne-saffiche",
+      "prompt": "j'ai un projet roblox-ts avec @rbxts/react, mon menu shop s'affiche pas du tout dans studio. dans la console j'ai juste : Infinite yield possible on 'ReplicatedStorage.rbxts_include.node_modules:WaitForChild(\"@rbxts-js\")'. mon default.project.json c'est celui du template de base de create-roblox-ts. tu peux me dire quoi changer ?",
+      "expected_output": "Explique que le scope npm @rbxts-js n'est pas synchronisé par Rojo et donne l'entrée exacte à ajouter dans default.project.json.",
+      "files": [],
+      "expectations": [
+        "Identifie que le dossier node_modules/@rbxts-js n'est pas synchronisé par Rojo et que c'est la cause du blocage",
+        "Donne l'entrée JSON exacte à ajouter sous rbxts_include > node_modules : \"@rbxts-js\": { \"$path\": \"node_modules/@rbxts-js\" }",
+        "Ne propose pas comme solution principale de réinstaller les paquets, de changer de version de React ou de réécrire le composant",
+        "Dit comment vérifier après la correction (Rojo resynchronise, relancer Play, plus d'Infinite yield dans la console)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "sauvegarde-et-achats",
+      "prompt": "fais moi en luau (scripts serveur) la sauvegarde des coins des joueurs + un developer product 'x2 coins pendant 10 minutes' (id 123456) + un game pass VIP (id 987654) qui donne +50% de coins. je veux pas que les joueurs perdent leur progression ni qu'ils paient deux fois pour rien. écris les fichiers.",
+      "expected_output": "Scripts serveur Luau avec session locking, chargement sûr, ProcessReceipt idempotent, game pass vérifié et boost géré côté serveur.",
+      "files": [],
+      "expectations": [
+        "Utilise un verrou de session (ProfileStore, ProfileService, ou UpdateAsync avec un verrou explicite) plutôt qu'un simple SetAsync",
+        "Ne traite pas un échec de chargement comme un nouveau joueur : aucune sauvegarde ne peut écraser des données après une lecture ratée",
+        "ProcessReceipt est idempotent : le PurchaseId est enregistré avec l'effet de l'achat avant de renvoyer PurchaseGranted",
+        "ProcessReceipt renvoie NotProcessedYet si le joueur est absent, si son profil n'est pas chargé ou si la sauvegarde échoue",
+        "Vérifie le game pass avec MarketplaceService:UserOwnsGamePassAsync dans un pcall et gère l'achat en cours de partie (PromptGamePassPurchaseFinished)",
+        "Sauvegarde à la sortie du joueur et dans game:BindToClose",
+        "N'utilise ni wait(), ni spawn(), ni delay() (seulement task.*)",
+        "Le boost x2 est stocké et décompté côté serveur (heure de fin ou temps restant sauvegardé), et le multiplicateur est appliqué par le serveur"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "remote-achat-epee",
+      "prompt": "dans mon jeu j'ai un shop, ajoute le remote pour acheter une épée qui coûte 500 coins. côté client y'a déjà un bouton BuyButton dans le ShopGui. fais le code client et serveur en luau.",
+      "expected_output": "Un remote dont le client n'envoie que l'identifiant de l'objet, avec validation, prix et débit gérés par le serveur.",
+      "files": [],
+      "expectations": [
+        "Le client n'envoie que l'identifiant de l'objet (ou rien d'autre de décisif), jamais le prix ni le montant à débiter",
+        "Le serveur lit le prix dans une table côté serveur et vérifie le solde avant de débiter",
+        "Le serveur valide le type et la valeur de l'argument reçu (type attendu, objet existant dans le catalogue)",
+        "Le serveur limite le débit des requêtes du joueur (cooldown ou token bucket)",
+        "Le débit des coins et l'ajout de l'épée sont faits côté serveur, sans possibilité de dupliquer l'objet ou de payer deux fois par un double clic",
+        "Le remote est placé dans ReplicatedStorage et son handler est dans un Script serveur (ServerScriptService)"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "bouton-anime-react",
+      "prompt": "en @rbxts/react (roblox-ts) fais moi un composant BuyButton animé : il grossit un peu quand la souris passe dessus, il s'enfonce quand on clique et il rebondit quand on lâche. il doit rester fluide même s'il y a beaucoup de boutons à l'écran.",
+      "expected_output": "Un composant TSX roblox-ts qui anime l'échelle par bindings ou ressorts sans re-render par frame, avec les bons événements Roblox.",
+      "files": [],
+      "expectations": [
+        "L'animation passe par des bindings (useBinding, ressort, ripple ou équivalent) ou par TweenService, et non par un setState à chaque frame",
+        "Branche les événements Roblox avec les props roblox-ts correctes (Event={{ ... }} ou Change={{ ... }}) pour le survol, l'appui et le clic",
+        "Met AutoButtonColor à false (ou explique pourquoi c'est inutile)",
+        "Gère le tactile (pas de survol qui reste collé) ou le mouvement réduit (GuiService.ReducedMotionEnabled)",
+        "Le bouton grossit depuis son centre (UIScale avec AnchorPoint 0.5, 0.5, ou équivalent)",
+        "Le code est du JSX roblox-ts valide : éléments Roblox en minuscules, aucune syntaxe DOM (div, onClick, className)"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "connecter-studio-mcp",
+      "prompt": "comment je branche claude code sur roblox studio pour qu'il voie mon jeu, qu'il lise mes scripts et qu'il lance des playtests tout seul ? je suis sur windows",
+      "expected_output": "Explique le serveur MCP intégré à Studio, son activation, la route Claude Code, le ciblage par studio_id, les outils officiels et les règles de sécurité.",
+      "files": [],
+      "expectations": [
+        "Parle du serveur MCP intégré à Roblox Studio (et non d'un serveur tiers à installer en premier)",
+        "Explique comment l'activer dans Studio (panneau Assistant → Settings → MCP Servers, ou Manage MCP Servers)",
+        "Indique la route côté Claude Code : plugin officiel Roblox Studio via /plugin, ou une entrée claude mcp manuelle",
+        "Mentionne list_roblox_studios / studio_id, ou le fait de vérifier quel Studio et quelle place sont connectés",
+        "Donne au moins une règle de sécurité : ne pas fermer Studio, sauvegarder avant les gros changements, ne jamais donner son mot de passe, ou confirmer avant de détruire",
+        "Cite au moins deux vrais outils officiels du serveur (par exemple execute_luau, start_stop_play, get_console_output, search_game_tree, script_read)"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "wally-profilestore-ezvisualz",
+      "prompt": "je veux ajouter ProfileStore et ezvisualz (le module de dégradés animés) dans mon projet luau, je passe par wally. tu peux me donner le wally.toml et la commande ?",
+      "expected_output": "Un wally.toml avec les identifiants exacts lm-loleris/profilestore (serveur) et arxkdev/ezvisualz, versions épinglées, et wally install.",
+      "files": [],
+      "expectations": [
+        "Utilise l'identifiant Wally exact de ProfileStore : lm-loleris/profilestore (pas loleris/profilestore ni une copie d'un inconnu)",
+        "Place ProfileStore sous [server-dependencies]",
+        "Utilise l'identifiant Wally exact d'ezVisualz : arxkdev/ezvisualz",
+        "Épingle des versions et donne la commande wally install",
+        "Conseille de vérifier l'identifiant ou le propriétaire du paquet, ou cite la source officielle des identifiants"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "ui-sans-message",
+      "prompt": "j'ai fait un menu en @rbxts/react, rojo serve tourne et le plugin est connecté, mais quand je fais play rien ne s'affiche. pas d'erreur rouge dans l'output. qu'est-ce que je vérifie ?",
+      "expected_output": "Un diagnostic ordonné qui place en tête le scope @rbxts-js non mappé (avertissement jaune Infinite yield), puis la compilation, le montage et l'emplacement du script client.",
+      "files": [],
+      "expectations": [
+        "Cite le scope @rbxts-js non mappé dans default.project.json comme cause probable",
+        "Demande de regarder les avertissements jaunes de la console Output (Infinite yield), pas seulement les erreurs rouges",
+        "Vérifie que rbxtsc -w tourne et que out/ est bien compilé",
+        "Vérifie le montage : createRoot sur PlayerGui (ou portail) et une screengui rendue",
+        "Vérifie l'emplacement du script client (src/client → StarterPlayerScripts)",
+        "Ordonne les vérifications de la plus probable ou la plus rapide à la moins probable"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "quotas-datastore",
+      "prompt": "combien de requêtes de lecture datastore je peux faire par minute sur un serveur avec 20 joueurs ? et si j'ai un script externe qui passe par open cloud, ça compte dans le même budget ?",
+      "expected_output": "La formule de lecture par serveur appliquée à 20 joueurs, le partage du budget d'expérience avec Open Cloud depuis 2026, la lecture du budget en direct, et un avertissement sur la fraîcheur des chiffres.",
+      "files": [],
+      "expectations": [
+        "Donne une formule de budget de lecture par serveur et l'applique à 20 joueurs",
+        "Utilise la formule de 2026, 60 + 40 × joueurs (860 pour 20), ou bien cite 60 + 10 × n en la signalant comme ancienne ou prudente",
+        "Dit que les requêtes Open Cloud partagent le budget de l'expérience avec les serveurs du jeu depuis 2026",
+        "Recommande de lire le budget en direct avec DataStoreService:GetRequestBudgetForRequestType",
+        "Signale que ces chiffres changent et qu'il faut revérifier la doc officielle"
+      ]
+    }
+  ]
+}
